@@ -30,7 +30,7 @@ pipeline{
       }
       } 
       stage ('unstash') {
-          agent { label 'JAVA_NODE2' } 
+          agent { label 'JAVA_ANSIBLE' } 
          steps { 
             unstash name: 'spring' 
          }
