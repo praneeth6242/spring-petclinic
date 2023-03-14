@@ -35,8 +35,7 @@ pipeline{
             unstash name: 'spring' 
             sh "sudo mv spc.service /etc/systemd/system/"
             sh "sudo chmod +x  /etc/systemd/system/spc.service"
-            sh "sudo systemctl daemon-reload /etc/systemd/system/spc.service"
-            sh "sudo systemctl start /etc/systemd/system/spc.service"
+            sh "sudo systemctl restart /etc/systemd/system/spc.service"
          }
       }    
 
