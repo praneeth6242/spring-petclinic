@@ -64,11 +64,6 @@ pipeline{
              sh 'mvn clean package sonar:sonar -Dsonar.organization=thanvispc' 
          } 
       } 
-      stage('download artifact') {
-        steps('url of artifact') {
-             sh "curl 'https://praneeth6242.jfrog.io/artifactory/path/to/repository/$LATEST_ARTIFACT'"
-        }
-      }
-      }
+     }
    }
    }
