@@ -1,6 +1,5 @@
-
 pipeline{ 
-   agent { label 'JAVA_JENKINSNODE' } 
+   agent { label 'JAVA_NEWNODE' } 
    triggers { pollSCM ('* * * * *') } 
     parameters {
         choice(name: 'MAVEN_GOAL', choices: ['package', 'install', 'clean'], description: 'Maven Goal')
@@ -9,7 +8,7 @@ pipeline{
       stage('clone') {
          steps {
              git url: 'https://github.com/praneeth6242/spring-petclinic.git',
-              branch: 'main' 
+              branch: 'declerative' 
          } 
       } 
 	   stage ('Artifactory configuration') {
@@ -43,7 +42,7 @@ pipeline{
             steps {
                 rtMavenRun (
                     tool: 'MAVEN-1', // Tool name from Jenkins configuration
-                    pom: 'maven-examples/maven-example/pom.xml',
+                    pom: 'pom.xml',
                     goals: 'clean install',
                     deployerId: "MAVEN_DEPLOYER",
                     resolverId: "MAVEN_RESOLVER"
@@ -58,12 +57,28 @@ pipeline{
                 )
             }
         }
-      stage('SonarQube analysis') { 
-           steps('SonarQube analysis') {
-             withSonarQubeEnv('THANVI_SPC') {
-             sh 'mvn clean package sonar:sonar -Dsonar.organization=thanvispc' 
+        stage('SonarQube analysis') { 
+         tools {
+            jdk 'JDK_17'
+            maven 'MAVEN-1'
+         }
+         steps('SonarQube analysis') {
+            withSonarQubeEnv('THANVI_SPC') {
+            sh 'mvn clean package sonar:sonar -Dsonar.organization=thanvispc -Dsonar.projectKey=thanvispc_spcjenkins'
+            sh 'echo $RUN_ARTIFACTS_DISPLAY_URL'  
+            sh 'echo $BUILD_URL' 
+            sh 'echo $LATEST_ARTIFACT'
          } 
-      } 
-     }
+      }
+      }
+       stage("Quality Gate") {
+         steps {
+                timeout(time: 1, unit: 'HOURS') {
+                    // Parameter indicates whether to set pipeline to UNSTABLE if Quality Gate fails
+                    // true = set pipeline to UNSTABLE, false = don't
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
    }
    }
