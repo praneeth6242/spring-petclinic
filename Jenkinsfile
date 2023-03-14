@@ -1,6 +1,6 @@
 
 pipeline{ 
-   agent { label 'JAVA_NODE1' } 
+   agent { label 'JAVA_NEWNODE' } 
    triggers { pollSCM ('* * * * *') } 
     parameters {
         choice(name: 'MAVEN_GOAL', choices: ['package', 'install', 'clean'], description: 'Maven Goal')
@@ -42,7 +42,7 @@ pipeline{
 			  }
             steps {
                 rtMavenRun (
-                    tool: 'MAVEN', // Tool name from Jenkins configuration
+                    tool: 'MAVEN-1', // Tool name from Jenkins configuration
                     pom: 'maven-examples/maven-example/pom.xml',
                     goals: 'clean install',
                     deployerId: "MAVEN_DEPLOYER",
