@@ -1,0 +1,14 @@
+- name: Playbook
+  hosts: localhost 
+  become: yes 
+  tasks: 
+    - name: copy service file 
+      ansible.builtin.copy: 
+        src: spc.service 
+        dest: /etc/systemd/system/spc.service 
+        mode: '777'
+    - name: systemd
+      ansible.builtin.systemd:
+        name: spc.service 
+        enabled: true 
+        state: started      
