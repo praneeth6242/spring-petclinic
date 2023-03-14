@@ -33,12 +33,8 @@ pipeline{
           agent { label 'JAVA_NODE2' } 
          steps { 
             unstash name: 'spring' 
-            sh "sudo mv spc.service /etc/systemd/system/"
-            sh "sudo chmod +x  /etc/systemd/system/spc.service"
-            sh "sudo systemctl restart /etc/systemd/system/spc.service"
          }
       }    
-
    } 
    post {
       always {
