@@ -1,0 +1,21 @@
+  - name: Playbook
+    hosts: localhost 
+    become: yes
+    tasks: 
+      - name: Download foo.conf
+        ansible.builtin.get_url:
+          url: 'https://praneeth6242.jfrog.io/artifactory/libs-snapshot-local/org/springframework/samples/spring-petclinic/3.0.0-SNAPSHOT/spring-petclinic-3.0.0-20230314.062855-22.jar'
+          dest: /opt/spring-petclinic-3.0.0.jar 
+          url_username: chowdarybtc@gmail.com 
+          url_password: cmVmdGtuOjAxOjE3MTAzMTA1MzY6b0dFWkxDV0ZRb2h3UFJQekNoellSZ2lnNzc3
+          mode: '777' 
+      - name: copy service file 
+        ansible.builtin.copy: 
+          src: spring.service 
+          dest: /etc/systemd/system/spc.service 
+          mode: '777'
+      - name: systemd
+        ansible.builtin.systemd:
+          name: spring.service 
+          enabled: true 
+          state: started    
