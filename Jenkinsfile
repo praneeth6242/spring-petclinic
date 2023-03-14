@@ -1,6 +1,6 @@
 
 pipeline{ 
-   agent { label 'JAVA_NEWNODE' } 
+   agent { label 'JAVA_JENKINSNODE' } 
    triggers { pollSCM ('* * * * *') } 
     parameters {
         choice(name: 'MAVEN_GOAL', choices: ['package', 'install', 'clean'], description: 'Maven Goal')
