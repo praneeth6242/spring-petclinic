@@ -29,7 +29,7 @@ pipeline{
                   includes:  '**/target/spring-petclinic-3.0.0-SNAPSHOT.jar'
       }
       } 
-      stage ('postbuild') {
+      stage ('unstash') {
           agent { label 'JAVA_NODE2' } 
          steps { 
             unstash name: 'spring'
