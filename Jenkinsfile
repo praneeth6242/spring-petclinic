@@ -14,7 +14,7 @@ pipeline{
       stage('build') { 
          tools {
             jdk 'JDK_17'
-            maven 'MAVEN'
+            maven 'MAVEN-1'
          }
          steps {
             sh "mvn package"
