@@ -1,5 +1,5 @@
 pipeline{ 
-   agent { label 'JAVA_NEWNODE' } 
+   agent { label 'JAVA_NODE1' } 
    triggers { pollSCM ('* * * * *') } 
     parameters {
         choice(name: 'MAVEN_GOAL', choices: ['package', 'install', 'clean'], description: 'Maven Goal')
@@ -10,75 +10,32 @@ pipeline{
              git url: 'https://github.com/praneeth6242/spring-petclinic.git',
               branch: 'declerative' 
          } 
-      } 
-	   stage ('Artifactory configuration') {
-            steps {
-                rtServer (
-                    id: "ARTIFACTORY_SERVER",
-                    url: 'https://praneeth6242.jfrog.io/artifactory',
-                    credentialsId: 'JFROG'
-                )
-
-                rtMavenDeployer (
-                    id: "MAVEN_DEPLOYER",
-                    serverId: "ARTIFACTORY_SERVER",
-                    releaseRepo: 'libs-release',
-                    snapshotRepo: 'libs-snapshot'
-                )
-
-                rtMavenResolver (
-                    id: "MAVEN_RESOLVER",
-                    serverId: "ARTIFACTORY_SERVER",
-                    releaseRepo:  'libs-release',
-                    snapshotRepo: 'libs-snapshot'
-                )
-            }
-        }
-
-        stage ('rt Maven') {
-		    tools {
-              jdk 'JDK_17'
-			  }
-            steps {
-                rtMavenRun (
-                    tool: 'MAVEN-1', // Tool name from Jenkins configuration
-                    pom: 'pom.xml',
-                    goals: 'clean install',
-                    deployerId: "MAVEN_DEPLOYER",
-                    resolverId: "MAVEN_RESOLVER"
-                )
-            }
-        }
-
-        stage ('Publish build info') {
-            steps {
-                rtPublishBuildInfo (
-                    serverId: "ARTIFACTORY_SERVER"
-                )
-            }
-        }
-        stage('SonarQube analysis') { 
+      }
+      stage('build') { 
          tools {
             jdk 'JDK_17'
-            maven 'MAVEN-1'
+            maven 'MAVEN'
          }
-         steps('SonarQube analysis') {
-            withSonarQubeEnv('THANVI_SPC') {
-            sh 'mvn clean package sonar:sonar -Dsonar.organization=thanvispc -Dsonar.projectKey=thanvispc_spcjenkins'
-            sh 'echo $RUN_ARTIFACTS_DISPLAY_URL'  
-            sh 'echo $BUILD_URL' 
-            sh 'echo $LATEST_ARTIFACT'
-         } 
-      }
-      }
-       stage("Quality Gate") {
          steps {
-                timeout(time: 1, unit: 'HOURS') {
-                    // Parameter indicates whether to set pipeline to UNSTABLE if Quality Gate fails
-                    // true = set pipeline to UNSTABLE, false = don't
-                    waitForQualityGate abortPipeline: true
-                }
-            }
-        }
+            sh "mvn ${params.MAVEN_GOAL}"
+         }
+      } 
+      stage ('postbuild') {
+         steps {
+           archiveArtifacts artifacts:  '**/target/spring-petclinic-3.0.0-SNAPSHOT.jar',
+                         onlyIfSuccessful: true
+            junit testResults: '**/surefire-reports/TEST-*.xml'
+            stash name: 'spring',
+                  includes:  '**/target/spring-petclinic-3.0.0-SNAPSHOT.jar'
+      }
+      }
+   } 
+   post {
+      always {
+         mail subject: 'the build ${JOB_NAME} with ${BUILD_ID} is build',
+              body: 'build is either success or fail',
+              from: 'praneeth@gmail.com',
+              to: 'poorna@gmail.com'
+      }
    }
-   }
+}
